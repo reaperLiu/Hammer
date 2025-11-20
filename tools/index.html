@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工具导航 - Hammer</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔨</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .breadcrumb {
+            margin-bottom: 30px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .breadcrumb a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .tools-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .tool-item {
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tool-item:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .tool-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .tool-icon {
+            font-size: 2em;
+            margin-right: 15px;
+        }
+
+        .tool-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .tool-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .tool-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .status-ready {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-coming {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .tool-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e9ecef;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #545b62;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .tools-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .tool-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../" class="back-btn">← 返回主页</a>
+        
+        <div class="header">
+            <h1>🛠️ 工具导航</h1>
+            <p>选择你需要的工具</p>
+        </div>
+
+        <div class="breadcrumb">
+            <a href="../">Hammer</a> / 工具导航
+        </div>
+
+        <div class="tools-list">
+            <!-- 身份证验证器 -->
+            <div class="tool-item">
+                <div class="tool-header">
+                    <div class="tool-icon">🆔</div>
+                    <div class="tool-title">中国身份证验证器</div>
+                </div>
+                <div class="tool-description">
+                    专业的18位身份证号码批量验证工具，支持智能空格处理、结果分类显示和一键复制功能。完全本地验证，保护隐私安全。
+                </div>
+                <div class="tool-meta">
+                    <span class="status-badge status-ready">✅ 已上线</span>
+                    <span>v1.0.0</span>
+                </div>
+                <div class="tool-actions">
+                    <a href="chinaidcard/standalone_ui.html" class="btn btn-primary">🚀 立即使用</a>
+                    <a href="chinaidcard/" class="btn btn-secondary">📖 查看文档</a>
+                </div>
+            </div>
+
+            <!-- JSON格式化工具 -->
+            <div class="tool-item">
+                <div class="tool-header">
+                    <div class="tool-icon">📋</div>
+                    <div class="tool-title">JSON格式化工具</div>
+                </div>
+                <div class="tool-description">
+                    强大的JSON数据处理工具，支持格式化、压缩、验证和转换功能。支持大文件处理和数据结构可视化。
+                </div>
+                <div class="tool-meta">
+                    <span class="status-badge status-coming">🚧 即将上线</span>
+                    <span>预计2025-12</span>
+                </div>
+                <div class="tool-actions">
+                    <button class="btn btn-primary" disabled>即将推出</button>
+                </div>
+            </div>
+
+            <!-- Base64编解码器 -->
+            <div class="tool-item">
+                <div class="tool-header">
+                    <div class="tool-icon">🔐</div>
+                    <div class="tool-title">Base64编解码器</div>
+                </div>
+                <div class="tool-description">
+                    便捷的Base64编码解码工具，支持文本和文件的批量处理。支持拖拽上传和多种字符编码。
+                </div>
+                <div class="tool-meta">
+                    <span class="status-badge status-coming">🚧 即将上线</span>
+                    <span>预计2025-12</span>
+                </div>
+                <div class="tool-actions">
+                    <button class="btn btn-primary" disabled>即将推出</button>
+                </div>
+            </div>
+
+            <!-- URL编解码器 -->
+            <div class="tool-item">
+                <div class="tool-header">
+                    <div class="tool-icon">🔗</div>
+                    <div class="tool-title">URL编解码器</div>
+                </div>
+                <div class="tool-description">
+                    专业的URL编码解码工具，支持批量处理和格式验证。支持国际化域名和参数解析展示。
+                </div>
+                <div class="tool-meta">
+                    <span class="status-badge status-coming">🚧 即将上线</span>
+                    <span>预计2025-12</span>
+                </div>
+                <div class="tool-actions">
+                    <button class="btn btn-primary" disabled>即将推出</button>
+                </div>
+            </div>
+
+            <!-- 时间戳转换器 -->
+            <div class="tool-item">
+                <div class="tool-header">
+                    <div class="tool-icon">⏰</div>
+                    <div class="tool-title">时间戳转换器</div>
+                </div>
+                <div class="tool-description">
+                    多功能时间戳转换工具，支持各种时间格式的相互转换。支持时区转换和相对时间计算。
+                </div>
+                <div class="tool-meta">
+                    <span class="status-badge status-coming">🚧 即将上线</span>
+                    <span>预计2025-12</span>
+                </div>
+                <div class="tool-actions">
+                    <button class="btn btn-primary" disabled>即将推出</button>
+                </div>
+            </div>
+
+            <!-- 正则表达式测试器 -->
+            <div class="tool-item">
+                <div class="tool-header">
+                    <div class="tool-icon">🔍</div>
+                    <div class="tool-title">正则表达式测试器</div>
+                </div>
+                <div class="tool-description">
+                    强大的正则表达式测试和学习工具，支持实时匹配和语法高亮。包含常用正则模板和性能分析。
+                </div>
+                <div class="tool-meta">
+                    <span class="status-badge status-coming">🚧 即将上线</span>
+                    <span>预计2025-12</span>
+                </div>
+                <div class="tool-actions">
+                    <button class="btn btn-primary" disabled>即将推出</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 工具卡片点击效果
+        document.querySelectorAll('.tool-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON') {
+                    const primaryBtn = this.querySelector('.btn-primary');
+                    if (primaryBtn && !primaryBtn.disabled) {
+                        primaryBtn.click();
+                    }
+                }
+            });
+        });
+
+        // 页面加载动画
+        document.addEventListener('DOMContentLoaded', function() {
+            const toolItems = document.querySelectorAll('.tool-item');
+            toolItems.forEach((item, index) => {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    item.style.transition = 'all 0.6s ease';
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>
