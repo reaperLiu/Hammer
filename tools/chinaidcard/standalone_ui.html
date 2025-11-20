@@ -762,8 +762,24 @@ abcd1234567</code>
                 return;
             }
 
-            const validNumbers = currentResults.valid_ids.map(item => item.processed).join('\n');
-            copyToClipboard(validNumbers, `已复制 ${currentResults.valid_ids.length} 个合法号码到剪贴板`);
+            // 按类型分类：身份证号在前，手机号在后
+            const idCards = currentResults.valid_ids.filter(item => item.type === '身份证号');
+            const mobiles = currentResults.valid_ids.filter(item => item.type === '手机号');
+            
+            let copyContent = '';
+            
+            // 先添加身份证号
+            if (idCards.length > 0) {
+                copyContent += idCards.map(item => item.processed).join('\n');
+            }
+            
+            // 再添加手机号
+            if (mobiles.length > 0) {
+                if (copyContent) copyContent += '\n'; // 如果前面有内容，添加换行
+                copyContent += mobiles.map(item => item.processed).join('\n');
+            }
+
+            copyToClipboard(copyContent, `已复制 ${currentResults.valid_ids.length} 个合法号码到剪贴板（身份证号在前，手机号在后）`);
         });
 
         // 复制不合法号码按钮
@@ -779,28 +795,57 @@ abcd1234567</code>
 
         // 显示结果
         function displayResults(data) {
+            // 按类型分类合法号码：身份证号在前，手机号在后
+            const idCards = data.valid_ids.filter(item => item.type === '身份证号');
+            const mobiles = data.valid_ids.filter(item => item.type === '手机号');
+            const sortedValidIds = [...idCards, ...mobiles];
+
             // 显示合法号码
             validResults.innerHTML = '';
-            data.valid_ids.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'result-item valid';
+            
+            // 如果有身份证号，先显示分类标题
+            if (idCards.length > 0) {
+                const idHeader = document.createElement('div');
+                idHeader.style.cssText = 'font-weight: bold; color: #155724; margin: 10px 0 5px 0; padding: 5px 0; border-bottom: 2px solid #28a745;';
+                idHeader.textContent = `🆔 身份证号码 (${idCards.length}个)`;
+                validResults.appendChild(idHeader);
                 
-                let detailInfo = '';
-                if (item.area) {
-                    // 身份证信息
-                    detailInfo = `${item.area} | ${item.birth_date} | ${item.age}岁 | ${item.gender}`;
-                } else if (item.carrier) {
-                    // 手机号信息
-                    detailInfo = `${item.carrier} | ${item.number_type}`;
-                }
+                idCards.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'result-item valid';
+                    
+                    const detailInfo = `${item.area} | ${item.birth_date} | ${item.age}岁 | ${item.gender}`;
+                    
+                    div.innerHTML = `
+                        <strong>${item.processed}</strong><br>
+                        <small>原始输入: ${item.original}</small><br>
+                        <small>${detailInfo}</small>
+                    `;
+                    validResults.appendChild(div);
+                });
+            }
+
+            // 如果有手机号，显示分类标题
+            if (mobiles.length > 0) {
+                const mobileHeader = document.createElement('div');
+                mobileHeader.style.cssText = 'font-weight: bold; color: #155724; margin: 15px 0 5px 0; padding: 5px 0; border-bottom: 2px solid #28a745;';
+                mobileHeader.textContent = `📱 手机号码 (${mobiles.length}个)`;
+                validResults.appendChild(mobileHeader);
                 
-                div.innerHTML = `
-                    <strong>[${item.type}] ${item.processed}</strong><br>
-                    <small>原始输入: ${item.original}</small><br>
-                    ${detailInfo ? `<small>${detailInfo}</small>` : ''}
-                `;
-                validResults.appendChild(div);
-            });
+                mobiles.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'result-item valid';
+                    
+                    const detailInfo = `${item.carrier} | ${item.number_type}`;
+                    
+                    div.innerHTML = `
+                        <strong>${item.processed}</strong><br>
+                        <small>原始输入: ${item.original}</small><br>
+                        <small>${detailInfo}</small>
+                    `;
+                    validResults.appendChild(div);
+                });
+            }
 
             // 显示不合法号码
             invalidResults.innerHTML = '';
