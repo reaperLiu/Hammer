@@ -1,0 +1,10 @@
+# 中国身份证号码验证器依赖包
+# Chinese ID Card Validator Dependencies
+
+# Web界面支持
+Flask>=2.0.0
+
+# 可选：GUI界面复制功能支持（如果系统支持tkinter）
+# pyperclip>=1.8.0
+
+# 注意：tkinter 是 Python 标准库的一部分，但在某些系统上可能需要单独安装
