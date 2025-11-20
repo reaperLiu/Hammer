@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>中国身份证号码批量验证器</title>
+    <title>身份证号&手机号批量去空格校验器</title>
     <style>
         * {
             margin: 0;
@@ -298,14 +298,14 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>中国身份证号码批量验证器</h1>
-            <p>支持批量验证、智能空格处理、结果分类和一键复制</p>
+            <h1>身份证号&手机号批量去空格校验器</h1>
+            <p>支持身份证号和手机号批量验证、智能识别、空格处理、结果分类和一键复制</p>
         </div>
 
         <div class="main-content">
             <div class="input-section">
-                <label class="input-label">请输入身份证号码（每行一个）：</label>
-                <textarea id="inputText" class="input-textarea" placeholder="在此输入身份证号码，每行一个...&#10;支持包含空格的格式，系统会自动处理&#10;&#10;快捷键：Ctrl+Enter 开始验证"></textarea>
+                <label class="input-label">请输入身份证号码或手机号（每行一个）：</label>
+                <textarea id="inputText" class="input-textarea" placeholder="在此输入身份证号码或手机号，每行一个...&#10;支持包含空格的格式，系统会自动识别类型并处理&#10;&#10;快捷键：Ctrl+Enter 开始验证"></textarea>
                 
                 <div class="sample-data">
                     <h4>📝 示例数据（点击使用）：</h4>
@@ -314,7 +314,14 @@
 1101 0119 9003 0748 99
 440 101 198501 011235
 110101199003074897
-99010119900307489X</code>
+138 0013 8000
+1380013 8001
+13800138002
+186 8888 9999
+ 17712345678 
+15900000000
+1390000000x
+abcd1234567</code>
                 </div>
             </div>
 
@@ -327,20 +334,20 @@
                 <div class="results-grid">
                     <div class="result-panel valid">
                         <div class="result-header">
-                            <span class="result-title valid">✅ 合法身份证</span>
+                            <span class="result-title valid">✅ 合法号码</span>
                             <span id="validCount" class="result-count valid">数量: 0</span>
                         </div>
                         <div id="validResults" class="result-content"></div>
-                        <button id="copyValidBtn" class="copy-btn">📋 复制合法身份证号码</button>
+                        <button id="copyValidBtn" class="copy-btn">📋 复制合法号码</button>
                     </div>
 
                     <div class="result-panel invalid">
                         <div class="result-header">
-                            <span class="result-title invalid">❌ 不合法身份证</span>
+                            <span class="result-title invalid">❌ 不合法号码</span>
                             <span id="invalidCount" class="result-count invalid">数量: 0</span>
                         </div>
                         <div id="invalidResults" class="result-content"></div>
-                        <button id="copyInvalidBtn" class="copy-btn">📋 复制不合法身份证号码</button>
+                        <button id="copyInvalidBtn" class="copy-btn">📋 复制不合法号码</button>
                     </div>
                 </div>
             </div>
@@ -350,6 +357,78 @@
     </div>
 
     <script>
+        // 手机号验证器类
+        class MobileValidator {
+            constructor() {
+                // 中国手机号正则表达式（支持三大运营商）
+                this.MOBILE_PATTERNS = {
+                    // 中国移动：134-139, 147, 150-152, 157-159, 172, 178, 182-184, 187-188, 195, 198
+                    'mobile': /^1(3[4-9]|4[7]|5[0-27-9]|7[28]|8[2-478]|9[58])\d{8}$/,
+                    // 中国联通：130-132, 145, 155-156, 166, 171, 175-176, 185-186, 1709
+                    'unicom': /^1(3[0-2]|4[5]|5[56]|6[6]|7[156]|8[56])\d{8}$/,
+                    // 中国电信：133, 149, 153, 173, 177, 180-181, 189, 191, 193, 199
+                    'telecom': /^1(3[3]|4[9]|5[3]|7[37]|8[019]|9[139])\d{8}$/
+                };
+                
+                this.CARRIER_NAMES = {
+                    'mobile': '中国移动',
+                    'unicom': '中国联通', 
+                    'telecom': '中国电信'
+                };
+            }
+
+            validate(mobile) {
+                // 去除所有空格、短横线等分隔符
+                const originalMobile = mobile;
+                mobile = mobile ? mobile.replace(/[\s\-]/g, '').trim() : '';
+                
+                const result = {
+                    valid: false,
+                    mobile_number: mobile,
+                    original_input: originalMobile,
+                    errors: [],
+                    info: {}
+                };
+
+                // 基本格式检查
+                if (!this.checkFormat(mobile)) {
+                    result.errors.push('手机号格式不正确');
+                    return result;
+                }
+
+                // 运营商检查
+                const carrier = this.getCarrier(mobile);
+                if (carrier) {
+                    result.info.carrier = this.CARRIER_NAMES[carrier];
+                    result.info.number_type = '手机号';
+                    result.valid = true;
+                } else {
+                    result.errors.push('不支持的手机号段');
+                }
+
+                return result;
+            }
+
+            checkFormat(mobile) {
+                if (!mobile || mobile.length !== 11) {
+                    return false;
+                }
+                
+                // 必须以1开头，第二位是3-9，后面9位都是数字
+                const pattern = /^1[3-9]\d{9}$/;
+                return pattern.test(mobile);
+            }
+
+            getCarrier(mobile) {
+                for (const [carrier, pattern] of Object.entries(this.MOBILE_PATTERNS)) {
+                    if (pattern.test(mobile)) {
+                        return carrier;
+                    }
+                }
+                return null;
+            }
+        }
+
         // 身份证验证器类 - 直接嵌入JavaScript版本
         class ChineseIDValidator {
             constructor() {
@@ -524,8 +603,52 @@
         const statusBar = document.getElementById('statusBar');
         const sampleData = document.getElementById('sampleData');
 
+        // 统一验证器类
+        class UnifiedValidator {
+            constructor() {
+                this.idValidator = new ChineseIDValidator();
+                this.mobileValidator = new MobileValidator();
+            }
+
+            // 自动识别输入类型并验证
+            validate(input) {
+                // 去除空格后判断类型
+                const cleanInput = input.replace(/\s/g, '').trim();
+                
+                if (this.isIdNumber(cleanInput)) {
+                    const result = this.idValidator.validate(input);
+                    result.type = 'id_card';
+                    result.type_name = '身份证号';
+                    return result;
+                } else if (this.isMobileNumber(cleanInput)) {
+                    const result = this.mobileValidator.validate(input);
+                    result.type = 'mobile';
+                    result.type_name = '手机号';
+                    return result;
+                } else {
+                    return {
+                        valid: false,
+                        original_input: input,
+                        errors: ['无法识别输入类型，请确认是否为有效的身份证号或手机号'],
+                        type: 'unknown',
+                        type_name: '未知类型'
+                    };
+                }
+            }
+
+            isIdNumber(input) {
+                // 18位，前17位数字，最后一位数字或X
+                return /^\d{17}[\dX]$/i.test(input);
+            }
+
+            isMobileNumber(input) {
+                // 11位数字，以1开头
+                return /^1\d{10}$/.test(input);
+            }
+        }
+
         // 创建验证器实例
-        const validator = new ChineseIDValidator();
+        const validator = new UnifiedValidator();
         let currentResults = {
             valid_ids: [],
             invalid_ids: []
@@ -541,7 +664,7 @@
         validateBtn.addEventListener('click', function() {
             const input = inputText.value.trim();
             if (!input) {
-                alert('请输入要验证的身份证号码');
+                alert('请输入要验证的身份证号码或手机号');
                 return;
             }
 
@@ -557,7 +680,7 @@
                         .filter(line => line.length > 0);
 
                     if (lines.length === 0) {
-                        alert('请输入要验证的身份证号码');
+                        alert('请输入要验证的身份证号码或手机号');
                         return;
                     }
 
@@ -570,22 +693,33 @@
                         const result = validator.validate(line);
 
                         if (result.valid) {
-                            // 合法身份证
-                            const info = result.info;
-                            validIds.push({
+                            // 合法号码
+                            const info = result.info || {};
+                            const validItem = {
                                 original: originalInput,
-                                processed: result.id_number,
-                                area: info.area || '未知',
-                                birth_date: info.birth_date || '未知',
-                                age: info.age || '未知',
-                                gender: info.gender || '未知'
-                            });
+                                processed: result.id_number || result.mobile_number || originalInput,
+                                type: result.type_name || '未知类型'
+                            };
+
+                            // 根据类型添加不同的信息
+                            if (result.type === 'id_card') {
+                                validItem.area = info.area || '未知';
+                                validItem.birth_date = info.birth_date || '未知';
+                                validItem.age = info.age || '未知';
+                                validItem.gender = info.gender || '未知';
+                            } else if (result.type === 'mobile') {
+                                validItem.carrier = info.carrier || '未知';
+                                validItem.number_type = info.number_type || '手机号';
+                            }
+
+                            validIds.push(validItem);
                         } else {
-                            // 不合法身份证
+                            // 不合法号码
                             invalidIds.push({
                                 original: originalInput,
-                                processed: result.id_number || originalInput,
-                                errors: result.errors
+                                processed: result.id_number || result.mobile_number || originalInput,
+                                errors: result.errors,
+                                type: result.type_name || '未知类型'
                             });
                         }
                     }
@@ -599,7 +733,7 @@
                     };
 
                     displayResults(currentResults);
-                    updateStatusBar(`验证完成 - 合法: ${validIds.length} 个，不合法: ${invalidIds.length} 个`, 'success');
+                    updateStatusBar(`验证完成 - 合法号码: ${validIds.length} 个，不合法号码: ${invalidIds.length} 个`, 'success');
 
                 } catch (error) {
                     console.error('验证出错:', error);
@@ -621,50 +755,60 @@
             updateStatusBar('就绪 - 使用本地JavaScript验证，无需网络连接', 'info');
         });
 
-        // 复制合法身份证按钮
+        // 复制合法号码按钮
         copyValidBtn.addEventListener('click', function() {
             if (currentResults.valid_ids.length === 0) {
-                alert('没有合法的身份证号码可复制');
+                alert('没有合法的号码可复制');
                 return;
             }
 
             const validNumbers = currentResults.valid_ids.map(item => item.processed).join('\n');
-            copyToClipboard(validNumbers, `已复制 ${currentResults.valid_ids.length} 个合法身份证号码到剪贴板`);
+            copyToClipboard(validNumbers, `已复制 ${currentResults.valid_ids.length} 个合法号码到剪贴板`);
         });
 
-        // 复制不合法身份证按钮
+        // 复制不合法号码按钮
         copyInvalidBtn.addEventListener('click', function() {
             if (currentResults.invalid_ids.length === 0) {
-                alert('没有不合法的身份证号码可复制');
+                alert('没有不合法的号码可复制');
                 return;
             }
 
             const invalidNumbers = currentResults.invalid_ids.map(item => item.original).join('\n');
-            copyToClipboard(invalidNumbers, `已复制 ${currentResults.invalid_ids.length} 个不合法身份证号码到剪贴板`);
+            copyToClipboard(invalidNumbers, `已复制 ${currentResults.invalid_ids.length} 个不合法号码到剪贴板`);
         });
 
         // 显示结果
         function displayResults(data) {
-            // 显示合法身份证
+            // 显示合法号码
             validResults.innerHTML = '';
             data.valid_ids.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'result-item valid';
+                
+                let detailInfo = '';
+                if (item.area) {
+                    // 身份证信息
+                    detailInfo = `${item.area} | ${item.birth_date} | ${item.age}岁 | ${item.gender}`;
+                } else if (item.carrier) {
+                    // 手机号信息
+                    detailInfo = `${item.carrier} | ${item.number_type}`;
+                }
+                
                 div.innerHTML = `
-                    <strong>${item.processed}</strong><br>
+                    <strong>[${item.type}] ${item.processed}</strong><br>
                     <small>原始输入: ${item.original}</small><br>
-                    <small>${item.area} | ${item.birth_date} | ${item.age}岁 | ${item.gender}</small>
+                    ${detailInfo ? `<small>${detailInfo}</small>` : ''}
                 `;
                 validResults.appendChild(div);
             });
 
-            // 显示不合法身份证
+            // 显示不合法号码
             invalidResults.innerHTML = '';
             data.invalid_ids.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'result-item invalid';
                 div.innerHTML = `
-                    <strong>${item.original}</strong><br>
+                    <strong>[${item.type}] ${item.original}</strong><br>
                     <small>错误: ${item.errors.join(', ')}</small>
                 `;
                 invalidResults.appendChild(div);
