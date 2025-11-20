@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国身份证号码批量验证器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-label {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .input-textarea {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 2px solid #e9ecef;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .results-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .result-panel {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+        }
+
+        .result-panel.valid {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        }
+
+        .result-panel.invalid {
+            border-color: #dc3545;
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .result-title.valid {
+            color: #155724;
+        }
+
+        .result-title.invalid {
+            color: #721c24;
+        }
+
+        .result-count {
+            background: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .result-count.valid {
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+
+        .result-count.invalid {
+            color: #721c24;
+            border: 2px solid #dc3545;
+        }
+
+        .result-content {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            border: 1px solid #dee2e6;
+        }
+
+        .result-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .result-item.valid {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+
+        .result-item.invalid {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+
+        .copy-btn {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        .status-bar {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+            color: #6c757d;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .status-bar.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-bar.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .sample-data {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .sample-data h4 {
+            color: #1565c0;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .sample-data code {
+            display: block;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-line;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>中国身份证号码批量验证器</h1>
+            <p>支持批量验证、智能空格处理、结果分类和一键复制</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <label class="input-label">请输入身份证号码（每行一个）：</label>
+                <textarea id="inputText" class="input-textarea" placeholder="在此输入身份证号码，每行一个...&#10;支持包含空格的格式，系统会自动处理"></textarea>
+                
+                <div class="sample-data">
+                    <h4>📝 示例数据（点击使用）：</h4>
+                    <code id="sampleData">110101199003074899
+ 310101198501011236 
+1101 0119 9003 0748 99
+440 101 198501 011235
+110101199003074897
+99010119900307489X</code>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button id="validateBtn" class="btn btn-primary">🔍 开始验证</button>
+                <button id="clearBtn" class="btn btn-secondary">🗑️ 清空输入</button>
+            </div>
+
+            <div id="loading" class="loading">
+                <div class="loading-spinner"></div>
+                <p>正在验证中，请稍候...</p>
+            </div>
+
+            <div id="resultsSection" class="results-section">
+                <div class="results-grid">
+                    <div class="result-panel valid">
+                        <div class="result-header">
+                            <span class="result-title valid">✅ 合法身份证</span>
+                            <span id="validCount" class="result-count valid">数量: 0</span>
+                        </div>
+                        <div id="validResults" class="result-content"></div>
+                        <button id="copyValidBtn" class="copy-btn">📋 复制合法身份证号码</button>
+                    </div>
+
+                    <div class="result-panel invalid">
+                        <div class="result-header">
+                            <span class="result-title invalid">❌ 不合法身份证</span>
+                            <span id="invalidCount" class="result-count invalid">数量: 0</span>
+                        </div>
+                        <div id="invalidResults" class="result-content"></div>
+                        <button id="copyInvalidBtn" class="copy-btn">📋 复制不合法身份证号码</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="statusBar" class="status-bar">就绪</div>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const inputText = document.getElementById('inputText');
+        const validateBtn = document.getElementById('validateBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const loading = document.getElementById('loading');
+        const resultsSection = document.getElementById('resultsSection');
+        const validResults = document.getElementById('validResults');
+        const invalidResults = document.getElementById('invalidResults');
+        const validCount = document.getElementById('validCount');
+        const invalidCount = document.getElementById('invalidCount');
+        const copyValidBtn = document.getElementById('copyValidBtn');
+        const copyInvalidBtn = document.getElementById('copyInvalidBtn');
+        const statusBar = document.getElementById('statusBar');
+        const sampleData = document.getElementById('sampleData');
+
+        let currentResults = {
+            valid_ids: [],
+            invalid_ids: []
+        };
+
+        // 点击示例数据填充输入框
+        sampleData.addEventListener('click', function() {
+            inputText.value = sampleData.textContent;
+            inputText.focus();
+        });
+
+        // 验证按钮点击事件
+        validateBtn.addEventListener('click', function() {
+            const input = inputText.value.trim();
+            if (!input) {
+                alert('请输入要验证的身份证号码');
+                return;
+            }
+
+            // 显示加载状态
+            loading.style.display = 'block';
+            resultsSection.style.display = 'none';
+            validateBtn.disabled = true;
+            updateStatusBar('正在验证中...', 'info');
+
+            // 发送验证请求
+            fetch('/validate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    'input_text': input
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                currentResults = data;
+                displayResults(data);
+                updateStatusBar(`验证完成 - 合法: ${data.valid_count} 个，不合法: ${data.invalid_count} 个`, 'success');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                updateStatusBar(`验证失败: ${error.message}`, 'error');
+                alert(`验证失败: ${error.message}`);
+            })
+            .finally(() => {
+                loading.style.display = 'none';
+                validateBtn.disabled = false;
+            });
+        });
+
+        // 清空按钮点击事件
+        clearBtn.addEventListener('click', function() {
+            inputText.value = '';
+            validResults.innerHTML = '';
+            invalidResults.innerHTML = '';
+            resultsSection.style.display = 'none';
+            currentResults = { valid_ids: [], invalid_ids: [] };
+            updateStatusBar('就绪', 'info');
+        });
+
+        // 复制合法身份证按钮
+        copyValidBtn.addEventListener('click', function() {
+            if (currentResults.valid_ids.length === 0) {
+                alert('没有合法的身份证号码可复制');
+                return;
+            }
+
+            const validNumbers = currentResults.valid_ids.map(item => item.processed).join('\n');
+            copyToClipboard(validNumbers, `已复制 ${currentResults.valid_ids.length} 个合法身份证号码到剪贴板`);
+        });
+
+        // 复制不合法身份证按钮
+        copyInvalidBtn.addEventListener('click', function() {
+            if (currentResults.invalid_ids.length === 0) {
+                alert('没有不合法的身份证号码可复制');
+                return;
+            }
+
+            const invalidNumbers = currentResults.invalid_ids.map(item => item.original).join('\n');
+            copyToClipboard(invalidNumbers, `已复制 ${currentResults.invalid_ids.length} 个不合法身份证号码到剪贴板`);
+        });
+
+        // 显示结果
+        function displayResults(data) {
+            // 显示合法身份证
+            validResults.innerHTML = '';
+            data.valid_ids.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'result-item valid';
+                div.innerHTML = `
+                    <strong>${item.processed}</strong><br>
+                    <small>原始输入: ${item.original}</small><br>
+                    <small>${item.area} | ${item.birth_date} | ${item.age}岁 | ${item.gender}</small>
+                `;
+                validResults.appendChild(div);
+            });
+
+            // 显示不合法身份证
+            invalidResults.innerHTML = '';
+            data.invalid_ids.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'result-item invalid';
+                div.innerHTML = `
+                    <strong>${item.original}</strong><br>
+                    <small>错误: ${item.errors.join(', ')}</small>
+                `;
+                invalidResults.appendChild(div);
+            });
+
+            // 更新计数
+            validCount.textContent = `数量: ${data.valid_count}`;
+            invalidCount.textContent = `数量: ${data.invalid_count}`;
+
+            // 显示结果区域
+            resultsSection.style.display = 'block';
+        }
+
+        // 复制到剪贴板
+        function copyToClipboard(text, message) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert(message);
+                }).catch(err => {
+                    console.error('复制失败:', err);
+                    fallbackCopyTextToClipboard(text, message);
+                });
+            } else {
+                fallbackCopyTextToClipboard(text, message);
+            }
+        }
+
+        // 备用复制方法
+        function fallbackCopyTextToClipboard(text, message) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    alert(message);
+                } else {
+                    alert('复制失败，请手动复制');
+                }
+            } catch (err) {
+                console.error('复制失败:', err);
+                alert('复制失败，请手动复制');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        // 更新状态栏
+        function updateStatusBar(message, type) {
+            statusBar.textContent = message;
+            statusBar.className = 'status-bar';
+            if (type) {
+                statusBar.classList.add(type);
+            }
+        }
+
+        // 回车键快速验证
+        inputText.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                validateBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>

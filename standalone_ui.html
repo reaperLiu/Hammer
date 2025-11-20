@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国身份证号码批量验证器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-label {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .input-textarea {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 2px solid #e9ecef;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .results-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .result-panel {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+        }
+
+        .result-panel.valid {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        }
+
+        .result-panel.invalid {
+            border-color: #dc3545;
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .result-title.valid {
+            color: #155724;
+        }
+
+        .result-title.invalid {
+            color: #721c24;
+        }
+
+        .result-count {
+            background: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .result-count.valid {
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+
+        .result-count.invalid {
+            color: #721c24;
+            border: 2px solid #dc3545;
+        }
+
+        .result-content {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            border: 1px solid #dee2e6;
+        }
+
+        .result-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .result-item.valid {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+
+        .result-item.invalid {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+
+        .copy-btn {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        .status-bar {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+            color: #6c757d;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .status-bar.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-bar.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .sample-data {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .sample-data h4 {
+            color: #1565c0;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .sample-data code {
+            display: block;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-line;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .sample-data code:hover {
+            background: #f0f8ff;
+        }
+
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>中国身份证号码批量验证器</h1>
+            <p>支持批量验证、智能空格处理、结果分类和一键复制</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <label class="input-label">请输入身份证号码（每行一个）：</label>
+                <textarea id="inputText" class="input-textarea" placeholder="在此输入身份证号码，每行一个...&#10;支持包含空格的格式，系统会自动处理&#10;&#10;快捷键：Ctrl+Enter 开始验证"></textarea>
+                
+                <div class="sample-data">
+                    <h4>📝 示例数据（点击使用）：</h4>
+                    <code id="sampleData">110101199003074899
+ 310101198501011236 
+1101 0119 9003 0748 99
+440 101 198501 011235
+110101199003074897
+99010119900307489X</code>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button id="validateBtn" class="btn btn-primary">🔍 开始验证</button>
+                <button id="clearBtn" class="btn btn-secondary">🗑️ 清空输入</button>
+            </div>
+
+            <div id="resultsSection" class="results-section">
+                <div class="results-grid">
+                    <div class="result-panel valid">
+                        <div class="result-header">
+                            <span class="result-title valid">✅ 合法身份证</span>
+                            <span id="validCount" class="result-count valid">数量: 0</span>
+                        </div>
+                        <div id="validResults" class="result-content"></div>
+                        <button id="copyValidBtn" class="copy-btn">📋 复制合法身份证号码</button>
+                    </div>
+
+                    <div class="result-panel invalid">
+                        <div class="result-header">
+                            <span class="result-title invalid">❌ 不合法身份证</span>
+                            <span id="invalidCount" class="result-count invalid">数量: 0</span>
+                        </div>
+                        <div id="invalidResults" class="result-content"></div>
+                        <button id="copyInvalidBtn" class="copy-btn">📋 复制不合法身份证号码</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="statusBar" class="status-bar">就绪 - 使用本地JavaScript验证，无需网络连接</div>
+    </div>
+
+    <script>
+        // 身份证验证器类 - 直接嵌入JavaScript版本
+        class ChineseIDValidator {
+            constructor() {
+                // 校验码权重数组
+                this.WEIGHTS = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2];
+                
+                // 校验码对应表
+                this.CHECK_CODES = ['1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2'];
+                
+                // 地区代码映射表
+                this.AREA_CODES = {
+                    '11': '北京市', '12': '天津市', '13': '河北省', '14': '山西省', '15': '内蒙古自治区',
+                    '21': '辽宁省', '22': '吉林省', '23': '黑龙江省',
+                    '31': '上海市', '32': '江苏省', '33': '浙江省', '34': '安徽省', '35': '福建省', '36': '江西省', '37': '山东省',
+                    '41': '河南省', '42': '湖北省', '43': '湖南省', '44': '广东省', '45': '广西壮族自治区', '46': '海南省',
+                    '50': '重庆市', '51': '四川省', '52': '贵州省', '53': '云南省', '54': '西藏自治区',
+                    '61': '陕西省', '62': '甘肃省', '63': '青海省', '64': '宁夏回族自治区', '65': '新疆维吾尔自治区',
+                    '71': '台湾省', '81': '香港特别行政区', '82': '澳门特别行政区'
+                };
+            }
+
+            validate(idNumber) {
+                // 去除首尾和中间的所有空格
+                const originalId = idNumber;
+                idNumber = idNumber ? idNumber.replace(/\s/g, '').trim() : '';
+                
+                const result = {
+                    valid: false,
+                    id_number: idNumber,
+                    original_input: originalId,
+                    errors: [],
+                    info: {}
+                };
+
+                // 基本格式检查
+                if (!this.checkFormat(idNumber)) {
+                    result.errors.push('身份证号码格式不正确');
+                    return result;
+                }
+
+                // 地区代码检查
+                const areaCode = idNumber.substring(0, 2);
+                if (!this.checkAreaCode(areaCode)) {
+                    result.errors.push('地区代码不存在');
+                } else {
+                    result.info.area = this.AREA_CODES[areaCode] || '未知地区';
+                }
+
+                // 出生日期检查
+                const birthDateStr = idNumber.substring(6, 14);
+                const birthDateResult = this.checkBirthDate(birthDateStr);
+                if (!birthDateResult.valid) {
+                    result.errors.push('出生日期不合法');
+                } else {
+                    result.info.birth_date = birthDateResult.date;
+                    result.info.age = this.calculateAge(new Date(birthDateResult.date));
+                }
+
+                // 校验码检查
+                if (!this.checkVerificationCode(idNumber)) {
+                    result.errors.push('校验码不正确');
+                }
+
+                // 性别信息
+                const sequenceCode = parseInt(idNumber.charAt(16));
+                result.info.gender = (sequenceCode % 2 === 1) ? '男' : '女';
+
+                // 如果没有错误，则验证通过
+                if (result.errors.length === 0) {
+                    result.valid = true;
+                }
+
+                return result;
+            }
+
+            checkFormat(idNumber) {
+                if (!idNumber || idNumber.length !== 18) {
+                    return false;
+                }
+                
+                // 前17位必须是数字，最后一位可以是数字或X
+                const pattern = /^\d{17}[\dX]$/;
+                return pattern.test(idNumber.toUpperCase());
+            }
+
+            checkAreaCode(areaCode) {
+                return Object.prototype.hasOwnProperty.call(this.AREA_CODES, areaCode);
+            }
+
+            checkBirthDate(birthDateStr) {
+                try {
+                    const year = parseInt(birthDateStr.substring(0, 4));
+                    const month = parseInt(birthDateStr.substring(4, 6));
+                    const day = parseInt(birthDateStr.substring(6, 8));
+                    
+                    // 检查年份范围（1900-当前年份）
+                    const currentYear = new Date().getFullYear();
+                    if (year < 1900 || year > currentYear) {
+                        return { valid: false };
+                    }
+                    
+                    const birthDate = new Date(year, month - 1, day);
+                    
+                    // 检查日期是否有效
+                    if (birthDate.getFullYear() !== year || 
+                        birthDate.getMonth() !== (month - 1) || 
+                        birthDate.getDate() !== day) {
+                        return { valid: false };
+                    }
+                    
+                    // 检查日期是否在未来
+                    if (birthDate > new Date()) {
+                        return { valid: false };
+                    }
+                        
+                    return { 
+                        valid: true, 
+                        date: `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}` 
+                    };
+                    
+                } catch (error) {
+                    return { valid: false };
+                }
+            }
+
+            checkVerificationCode(idNumber) {
+                const expectedCode = this.generateCheckCode(idNumber.substring(0, 17));
+                return idNumber.charAt(17).toUpperCase() === expectedCode;
+            }
+
+            generateCheckCode(id17) {
+                if (id17.length !== 17 || !/^\d{17}$/.test(id17)) {
+                    throw new Error('前17位必须都是数字');
+                }
+                
+                // 计算加权和
+                let total = 0;
+                for (let i = 0; i < 17; i++) {
+                    total += parseInt(id17.charAt(i)) * this.WEIGHTS[i];
+                }
+                
+                // 计算校验码
+                const remainder = total % 11;
+                return this.CHECK_CODES[remainder];
+            }
+
+            calculateAge(birthDate) {
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                
+                // 如果今年的生日还没到，年龄减1
+                if (today.getMonth() < birthDate.getMonth() || 
+                    (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+                
+                return age;
+            }
+        }
+
+        // 获取DOM元素
+        const inputText = document.getElementById('inputText');
+        const validateBtn = document.getElementById('validateBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const resultsSection = document.getElementById('resultsSection');
+        const validResults = document.getElementById('validResults');
+        const invalidResults = document.getElementById('invalidResults');
+        const validCount = document.getElementById('validCount');
+        const invalidCount = document.getElementById('invalidCount');
+        const copyValidBtn = document.getElementById('copyValidBtn');
+        const copyInvalidBtn = document.getElementById('copyInvalidBtn');
+        const statusBar = document.getElementById('statusBar');
+        const sampleData = document.getElementById('sampleData');
+
+        // 创建验证器实例
+        const validator = new ChineseIDValidator();
+        let currentResults = {
+            valid_ids: [],
+            invalid_ids: []
+        };
+
+        // 点击示例数据填充输入框
+        sampleData.addEventListener('click', function() {
+            inputText.value = sampleData.textContent;
+            inputText.focus();
+        });
+
+        // 验证按钮点击事件
+        validateBtn.addEventListener('click', function() {
+            const input = inputText.value.trim();
+            if (!input) {
+                alert('请输入要验证的身份证号码');
+                return;
+            }
+
+            updateStatusBar('正在验证中...', 'info');
+            validateBtn.disabled = true;
+
+            // 使用setTimeout来避免UI阻塞
+            setTimeout(() => {
+                try {
+                    // 分割成行
+                    const lines = input.split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line.length > 0);
+
+                    if (lines.length === 0) {
+                        alert('请输入要验证的身份证号码');
+                        return;
+                    }
+
+                    const validIds = [];
+                    const invalidIds = [];
+
+                    // 逐行验证
+                    for (const line of lines) {
+                        const originalInput = line;
+                        const result = validator.validate(line);
+
+                        if (result.valid) {
+                            // 合法身份证
+                            const info = result.info;
+                            validIds.push({
+                                original: originalInput,
+                                processed: result.id_number,
+                                area: info.area || '未知',
+                                birth_date: info.birth_date || '未知',
+                                age: info.age || '未知',
+                                gender: info.gender || '未知'
+                            });
+                        } else {
+                            // 不合法身份证
+                            invalidIds.push({
+                                original: originalInput,
+                                processed: result.id_number || originalInput,
+                                errors: result.errors
+                            });
+                        }
+                    }
+
+                    currentResults = {
+                        valid_ids: validIds,
+                        invalid_ids: invalidIds,
+                        total: lines.length,
+                        valid_count: validIds.length,
+                        invalid_count: invalidIds.length
+                    };
+
+                    displayResults(currentResults);
+                    updateStatusBar(`验证完成 - 合法: ${validIds.length} 个，不合法: ${invalidIds.length} 个`, 'success');
+
+                } catch (error) {
+                    console.error('验证出错:', error);
+                    updateStatusBar(`验证失败: ${error.message}`, 'error');
+                    alert(`验证失败: ${error.message}`);
+                } finally {
+                    validateBtn.disabled = false;
+                }
+            }, 100);
+        });
+
+        // 清空按钮点击事件
+        clearBtn.addEventListener('click', function() {
+            inputText.value = '';
+            validResults.innerHTML = '';
+            invalidResults.innerHTML = '';
+            resultsSection.style.display = 'none';
+            currentResults = { valid_ids: [], invalid_ids: [] };
+            updateStatusBar('就绪 - 使用本地JavaScript验证，无需网络连接', 'info');
+        });
+
+        // 复制合法身份证按钮
+        copyValidBtn.addEventListener('click', function() {
+            if (currentResults.valid_ids.length === 0) {
+                alert('没有合法的身份证号码可复制');
+                return;
+            }
+
+            const validNumbers = currentResults.valid_ids.map(item => item.processed).join('\n');
+            copyToClipboard(validNumbers, `已复制 ${currentResults.valid_ids.length} 个合法身份证号码到剪贴板`);
+        });
+
+        // 复制不合法身份证按钮
+        copyInvalidBtn.addEventListener('click', function() {
+            if (currentResults.invalid_ids.length === 0) {
+                alert('没有不合法的身份证号码可复制');
+                return;
+            }
+
+            const invalidNumbers = currentResults.invalid_ids.map(item => item.original).join('\n');
+            copyToClipboard(invalidNumbers, `已复制 ${currentResults.invalid_ids.length} 个不合法身份证号码到剪贴板`);
+        });
+
+        // 显示结果
+        function displayResults(data) {
+            // 显示合法身份证
+            validResults.innerHTML = '';
+            data.valid_ids.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'result-item valid';
+                div.innerHTML = `
+                    <strong>${item.processed}</strong><br>
+                    <small>原始输入: ${item.original}</small><br>
+                    <small>${item.area} | ${item.birth_date} | ${item.age}岁 | ${item.gender}</small>
+                `;
+                validResults.appendChild(div);
+            });
+
+            // 显示不合法身份证
+            invalidResults.innerHTML = '';
+            data.invalid_ids.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'result-item invalid';
+                div.innerHTML = `
+                    <strong>${item.original}</strong><br>
+                    <small>错误: ${item.errors.join(', ')}</small>
+                `;
+                invalidResults.appendChild(div);
+            });
+
+            // 更新计数
+            validCount.textContent = `数量: ${data.valid_count}`;
+            invalidCount.textContent = `数量: ${data.invalid_count}`;
+
+            // 显示结果区域
+            resultsSection.style.display = 'block';
+        }
+
+        // 复制到剪贴板
+        function copyToClipboard(text, message) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert(message);
+                }).catch(err => {
+                    console.error('复制失败:', err);
+                    fallbackCopyTextToClipboard(text, message);
+                });
+            } else {
+                fallbackCopyTextToClipboard(text, message);
+            }
+        }
+
+        // 备用复制方法
+        function fallbackCopyTextToClipboard(text, message) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    alert(message);
+                } else {
+                    alert('复制失败，请手动复制');
+                }
+            } catch (err) {
+                console.error('复制失败:', err);
+                alert('复制失败，请手动复制');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        // 更新状态栏
+        function updateStatusBar(message, type) {
+            statusBar.textContent = message;
+            statusBar.className = 'status-bar';
+            if (type) {
+                statusBar.classList.add(type);
+            }
+        }
+
+        // 回车键快速验证
+        inputText.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                validateBtn.click();
+            }
+        });
+
+        // 页面加载完成提示
+        window.addEventListener('load', function() {
+            updateStatusBar('就绪 - 使用本地JavaScript验证，无需网络连接 ✨', 'success');
+        });
+    </script>
+</body>
+</html>
